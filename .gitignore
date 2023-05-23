@@ -1,0 +1,14 @@
+venv
+# Default ignored files
+/shelf/
+**xml
+*/venv/*
+/logs/
+/instance/
+*.pyc
+*.log
+*.coverage
+**/.idea/workspace.xml
+**/.idea/tasks.xml
+*.idea
+/.idea/
