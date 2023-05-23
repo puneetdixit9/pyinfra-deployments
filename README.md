@@ -19,5 +19,5 @@ DOCKER_TAG=0.0.0
 * Change your ssh credentials in group_data/app_servers.py file.
 * Deploy your app on remote machine using the below command.
 ```commandline
-pyinfra inventories\staging.py setup_server.py    
+pyinfra inventories/staging.py setup_server.py    
 ```
