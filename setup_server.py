@@ -1,32 +1,22 @@
 import os
 
-from pyinfra import host
-from pyinfra.operations import server, files, git, apt, pkg
-from pyinfra import local
+from pyinfra.operations import git, apt, pip, server, files
 from dotenv import load_dotenv
 
 
-dotenv_path = os.path.join(os.path.expanduser("~"), "pyinfra.env")
+dotenv_path = os.path.join(os.getcwd(), ".env")
 load_dotenv(dotenv_path)
 
+APPLICATION_PATH = os.environ.get("APPLICATION_PATH")
+SERVER_PORT = os.environ.get("SERVER_PORT")
+APPLICATION_ENV_FILE_PATH_ON_LOCAL = os.environ.get("APPLICATION_ENV_FILE_PATH_ON_LOCAL")
+REPO_BRANCH = os.environ.get("REPO_BRANCH")
 
-
-
-CONTAINER_NAME=os.environ.get("CONTAINER_NAME")
-DOCKER_IMAGE=os.environ.get("DOCKER_IMAGE")
-DOCKER_TAG=os.environ.get("DOCKER_TAG")
-APP_NAME = os.environ.get("APP_NAME")
-
-
-
-
-repo_url = "https://github.com/puneetdixitstatusneo/pyinfra-test-app.git"
-remote_path = f"/opt/apps/{APP_NAME}"
 
 apt.update(
     name='Update package lists',
     _sudo=True
-    )
+)
 
 apt.upgrade(
     name="Upgrade package lists",
@@ -34,54 +24,53 @@ apt.upgrade(
 )
 
 apt.packages(
-    name="Ensuring the required packages",
+    name="Ensuring git is installed",
     packages=['git'],
-    _sudo=True
-)
-
-server.shell(
-    name='Setting /opt/apps/pyinfra-test-app to safe directory',
-    commands=[
-        'git config --global --add safe.directory /opt/apps/pyinfra-test-app'
-    ],
-    _sudo=True
 )
 
 git.repo(
-    name=f"Clone or Pull repo {os.environ.get('REPO')}",
+    name="Clone or Pull repo",
     src=os.environ.get('REPO_URL'),
-    dest=remote_path,
+    dest=APPLICATION_PATH,
     pull=True,
-    branch="main",
-    _sudo=True,
+    branch=REPO_BRANCH,
 )
 
-local.include('tasks/install_docker.py')
-local.include('tasks/install_nginx.py')
+apt.packages(
+    name='Ensure python3.10 and python3.10-venv is Installed',
+    packages=['python3.10', 'python3.10-venv'],
+)
+
+pip.venv(
+    name="Creating Virtual Environment",
+    path=f'{APPLICATION_PATH}/venv',
+    python="python3",
+)
+
+pip.packages(
+    name="Installing requirements.txt",
+    virtualenv=f'{APPLICATION_PATH}/venv',
+    requirements=f'{APPLICATION_PATH}/requirements.txt',
+)
 
 server.shell(
-    name='Build and run docker image ',
-    commands=[
-        f"cd /opt/apps/{APP_NAME}/ && sudo docker image build --rm -t {DOCKER_IMAGE}:{DOCKER_TAG} -f Dockerfile .",
-        f"docker stop {CONTAINER_NAME} || true && docker rm {CONTAINER_NAME} || true",
-        f"sudo docker run --name {CONTAINER_NAME} -p 5000:5000 -d --restart unless-stopped {DOCKER_IMAGE}:{DOCKER_TAG}"
-        ],
-    _get_pty=True,
-    _sudo=True
+    name="Killing the existing process on Port: {SERVER_PORT}",
+    commands=[f'kill -9 $(lsof -t -i:{SERVER_PORT})'],
+    _sudo=True,
+    _ignore_errors=True
 )
 
 files.put(
-    name='Copy nginx conf from host to remote',
-    src='./templates/nginx.conf',
-    dest='/etc/nginx/sites-available/app.conf',
-    _sudo=True,
+    name="Copy env file to the server",
+    src=APPLICATION_ENV_FILE_PATH_ON_LOCAL,
+    dest=f'{APPLICATION_PATH}/.env'
 )
 
 server.shell(
-    name='Restart on remote machine the nginx server with the new configuration',
+    name="Running Server...",
     commands=[
-        "sudo ln -s /etc/nginx/sites-available/app.conf /etc/nginx/sites-enabled/ || true",
-        "sudo systemctl restart nginx",
-        ],
-    _sudo=True
+        f'cd {APPLICATION_PATH} && {APPLICATION_PATH}/venv/bin/python -m flask run --host 0.0.0.0 --port {SERVER_PORT} '
+        f'> /dev/null 2>&1 &'
+    ]
 )
+

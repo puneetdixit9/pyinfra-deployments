@@ -1,15 +1,13 @@
 import os
+from dotenv import load_dotenv
+
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 
-ssh_port = 2000
-ssh_user = 'puneet'
-ssh_password = '1m2p3k4n'
+dotenv_path = os.path.join(os.path.dirname(basedir), ".env")
+load_dotenv(dotenv_path)
 
 
-# Use this ssh_key instead of ssh_password if you have ssh private_key
-
-# ssh_key=os.path.join(
-#   os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-#   ,'.vagrant/machines/default/virtualbox/private_key'
-#   )
-
+ssh_port = os.environ.get("SSH_PORT", 22)
+ssh_user = os.environ.get("SSH_USER")
+ssh_password = os.environ.get("SSH_PASSWORD")

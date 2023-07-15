@@ -6,18 +6,30 @@
 ```commandline
 pip install -r requirements.txt
 ```
-* Create a file on home path with name pyinfra.env with these keys.
+* Create a file on root folder with name .env with below values.
 ```commandline
-REPO=repo_url
-REPO_URL=repo url with access token if repo is private
-APP_NAME=pyinfra-test-app
-CONTAINER_NAME=awsome_app
-DOCKER_IMAGE=my_py_app
-DOCKER_TAG=0.0.0
+REPO_URL=<REPO_URL_WITH_ACCESS_TOKEN>
+REPO_BRANCH=<BRANCH_NAME>
+APPLICATION_PATH=<APPLICATION_PATH_ON_REMOTE_MACHINE>
+SSH_USER=<SSH_USERNAME>
+SSH_PASSWORD=<SSH_USER_PASSWORD>
+APP_SERVERS=<SERVER_IP_OR_DOMAIN_1,SERVER_IP_OR_DOMAIN_2>
 ```
-* Add server ip in inventories/staging.py in app_servers list.
-* Change your ssh credentials in group_data/app_servers.py file.
+* If deploying frontend application then add these details also in .env file.
+```commandline
+NODE_VERSION=<NODE_VERSION>
+```
+* And if deploying backend server then add these details in .env file.
+```commandline
+APPLICATION_ENV_FILE_PATH_ON_LOCAL=<YOUR APPLICATION ENV VARIABLES>
+SERVER_PORT=<SERVER_PORT>
+```
 * Deploy your app on remote machine using the below command.
+###### To deploy a Backend Server
 ```commandline
 pyinfra inventories/staging.py setup_server.py    
+```
+###### To deploy a Frontend Application
+```commandline
+pyinfra inventories/staging.py setup_frontend.py    
 ```
