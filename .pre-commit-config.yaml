@@ -1,0 +1,35 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        args: ["--profile", "black", "--filter-files"]
+        name: Isort (python)
+  - repo: https://github.com/psf/black
+    rev: 23.3.0
+    hooks:
+      - id: black
+        name: Black
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v1.2.3
+    hooks:
+      - id: flake8
+#  - repo: local
+#    hooks:
+#      - id: coverage
+#        name: Unit tests and code coverage
+#        entry: coverage
+#        language: system
+#        pass_filenames: false
+#        args: ["run", "--source", "./", "-m", "pytest", "-v", "--cov=./main", "--cov-fail-under=100", "--cov-report=term-missing", "./tests/unit_tests"]
+#      - id: coverage
+#        name: Integration tests and code coverage
+#        entry: coverage
+#        language: system
+#        pass_filenames: false
+#        args: ["run", "--source", "./", "-m", "pytest", "-v", "--cov=./main/modules", "--cov-fail-under=100", "--cov-report=term-missing", "./tests/integration_tests"]
