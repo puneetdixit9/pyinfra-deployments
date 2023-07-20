@@ -1,7 +1,8 @@
 import os
 
 from dotenv import load_dotenv
-from pyinfra.operations import apt, files, git, pip, python, server
+from pyinfra import local
+from pyinfra.operations import apt, files, pip, python, server
 
 from nginx_configure import update_backend_server_config
 
@@ -11,26 +12,9 @@ load_dotenv(dotenv_path)
 APPLICATION_PATH = os.environ.get("APPLICATION_PATH")
 SERVER_PORT = os.environ.get("SERVER_PORT")
 APPLICATION_ENV_FILE_PATH_ON_LOCAL = os.environ.get("APPLICATION_ENV_FILE_PATH_ON_LOCAL")
-REPO_BRANCH = os.environ.get("REPO_BRANCH")
 APP_NAME = os.environ.get("APP_NAME")
 
-
-apt.update(name="Update package lists", _sudo=True)
-
-apt.upgrade(name="Upgrade package lists", _sudo=True)
-
-apt.packages(
-    name="Ensuring git is installed",
-    packages=["git"],
-)
-
-git.repo(
-    name="Clone or Pull repo",
-    src=os.environ.get("REPO_URL"),
-    dest=APPLICATION_PATH,
-    pull=True,
-    branch=REPO_BRANCH,
-)
+local.include("./tasks/common_tasks.py")
 
 apt.packages(
     name="Ensure python3.10 and python3.10-venv is Installed", packages=["python3.10", "python3.10-venv"], _sudo=True
@@ -79,38 +63,4 @@ files.get(
 
 python.call(name="Updating Nginx Configuration", function=update_backend_server_config)
 
-files.put(
-    name="Uploading nginx config template file",
-    src="./templates/server.conf",
-    dest="/etc/nginx/sites-available/server.conf",
-    _sudo=True,
-)
-
-server.shell(
-    name="Remove nginx default files",
-    commands=[
-        "cd /etc/nginx/sites-enabled && rm -rf default",
-        "cd /etc/nginx/sites-available && rm -rf default",
-        "cd /usr/share/nginx/html && rm -rf index.html",
-    ],
-    _sudo=True,
-    _ignore_errors=True,
-)
-
-server.shell(
-    name="Symlink server.conf file",
-    commands=[
-        "cd /etc/nginx/sites-enabled && ln -s /etc/nginx/sites-available/server.conf .",
-    ],
-    _sudo=True,
-    _ignore_errors=True,
-)
-
-server.shell(
-    name="Restart NGINX",
-    commands=[
-        "systemctl restart nginx",
-    ],
-    _sudo=True,
-    _ignore_errors=True,
-)
+local.include("./tasks/nginx_tasks.py")

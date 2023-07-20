@@ -36,7 +36,6 @@ def update_frontend_app_config():
         current_config.server.add(
             nginx.Location(f"/{PREFIX_WORD}", nginx.Key("try_files", f"$uri $uri/ /{APP_NAME}/index.html"))
         )
-        print(current_config.filter(name="/static"))
         for child in current_config.server.children:
             if isinstance(child, nginx.Location) and child.value == "/static":
                 if APP_NAME not in child.keys[0].value:
