@@ -1,11 +1,11 @@
 from pyinfra.operations import files, server
 
-files.put(
-    name="Uploading nginx config template file",
-    src="./templates/server.conf",
-    dest="/etc/nginx/sites-available/server.conf",
-    _sudo=True,
-)
+# files.put(
+#     name="Uploading nginx config template file",
+#     src="./templates/server.conf",
+#     dest="/etc/nginx/sites-available/server.conf",
+#     _sudo=True,
+# )
 
 server.shell(
     name="Remove nginx default files",

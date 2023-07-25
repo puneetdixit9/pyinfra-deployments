@@ -15,3 +15,4 @@
 **/.idea/tasks.xml
 *.idea
 /.idea/
+venv

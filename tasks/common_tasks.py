@@ -10,15 +10,15 @@ APPLICATION_PATH = os.environ.get("APPLICATION_PATH")
 REPO_BRANCH = os.environ.get("REPO_BRANCH")
 
 
-apt.update(name="Update package lists", _sudo=True)
+# apt.update(name="Update package lists", _sudo=True)
 
-apt.upgrade(name="Upgrade package lists", _sudo=True)
+# apt.upgrade(name="Upgrade package lists", _sudo=True)
 
 apt.packages(name="Ensuring the git package", packages=["git"], _sudo=True)
 
 apt.packages(name="Ensuring the curl package", packages=["curl"], _sudo=True)
 
-apt.packages(name="Ensuring the unzip package", packages=["unzip"], _sudo=True)
+# apt.packages(name="Ensuring the unzip package", packages=["unzip"], _sudo=True)
 
 git.repo(
     name="Clone or Pull repo",

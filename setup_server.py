@@ -13,6 +13,7 @@ APPLICATION_PATH = os.environ.get("APPLICATION_PATH")
 SERVER_PORT = os.environ.get("SERVER_PORT")
 APPLICATION_ENV_FILE_PATH_ON_LOCAL = os.environ.get("APPLICATION_ENV_FILE_PATH_ON_LOCAL")
 APP_NAME = os.environ.get("APP_NAME")
+SERVER_PASSWORD=os.environ.get('SSH_PASSWORD')
 
 local.include("./tasks/common_tasks.py")
 
@@ -39,7 +40,7 @@ server.shell(
     _ignore_errors=True,
 )
 
-files.put(name="Copy env file to the server", src=APPLICATION_ENV_FILE_PATH_ON_LOCAL, dest=f"{APPLICATION_PATH}/.env")
+# files.put(name="Copy env file to the server", src=APPLICATION_ENV_FILE_PATH_ON_LOCAL, dest=f"{APPLICATION_PATH}/.env")
 
 
 server.shell(
@@ -50,16 +51,20 @@ server.shell(
     ],
 )
 
-apt.packages(name="Ensuring the nginx", packages=["nginx"], _sudo=True)
+# apt.packages(name="Ensuring the nginx", packages=["nginx"], _su_user=True)
+# server.shell(
+# name="Installing Nginx",
+# su_user='root',
+# commands=[f"apt install nginx -y "],
+# )
 
-
-files.get(
-    name="Downloading nginx current config file",
-    src="/etc/nginx/sites-available/server.conf",
-    dest="./templates/current_server.conf",
-    _sudo=True,
-    _ignore_errors=True,
-)
+# files.get(
+#     name="Downloading nginx current config file",
+#     src="/etc/nginx/sites-available/server.conf",
+#     dest="./templates/current_server.conf",
+#     _sudo=True,
+#     _ignore_errors=True,
+# )
 
 python.call(name="Updating Nginx Configuration", function=update_backend_server_config)
 
