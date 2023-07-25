@@ -1,14 +1,18 @@
-venv
 # Default ignored files
 /shelf/
 **xml
 */venv/*
+/flask_session/
 /logs/
 /instance/
 *.pyc
 *.log
+*.env
+/env/
+*/env/*
 *.coverage
 **/.idea/workspace.xml
 **/.idea/tasks.xml
 *.idea
 /.idea/
+venv
