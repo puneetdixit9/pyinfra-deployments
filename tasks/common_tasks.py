@@ -1,24 +1,30 @@
 import os
 
 from dotenv import load_dotenv
-from pyinfra.operations import apt, git
+from pyinfra import config
+from pyinfra.operations import git, server
 
 dotenv_path = os.path.join(os.getcwd(), ".env")
 load_dotenv(dotenv_path)
 
 APPLICATION_PATH = os.environ.get("APPLICATION_PATH")
 REPO_BRANCH = os.environ.get("REPO_BRANCH")
+SERVER_PASSWORD = os.environ.get("SSH_PASSWORD")
+HTTP_PROXY = os.environ.get("HTTP_PROXY")
+HTTPS_PROXY = os.environ.get("HTTPS_PROXY")
+config.USE_SUDO_PASSWORD = SERVER_PASSWORD
 
-
-# apt.update(name="Update package lists", _sudo=True)
-
-# apt.upgrade(name="Upgrade package lists", _sudo=True)
-
-apt.packages(name="Ensuring the git package", packages=["git"], _sudo=True)
-
-apt.packages(name="Ensuring the curl package", packages=["curl"], _sudo=True)
-
-# apt.packages(name="Ensuring the unzip package", packages=["unzip"], _sudo=True)
+commands = f"""
+su - -c'
+    export http_proxy={HTTP_PROXY}
+    export https_proxy={HTTPS_PROXY}
+    add-apt-repository universe -y
+    apt update -y
+    apt upgrade -y
+    apt-get install -y git curl nginx
+'
+"""
+server.shell(name="Updating APT packages and ensuring git and curl", commands=[commands], _sudo=True)
 
 git.repo(
     name="Clone or Pull repo",

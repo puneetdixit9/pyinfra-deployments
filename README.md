@@ -15,6 +15,8 @@ SSH_USER=<SSH_USERNAME>
 SSH_PASSWORD=<SSH_USER_PASSWORD>
 APP_SERVERS=<SERVER_IP_OR_DOMAIN_1,SERVER_IP_OR_DOMAIN_2>
 PREFIX_WORD=<PREFIX_OF_APP_PATHS_SERVER_APIS>
+HTTP_PROXY=<URL_OF_HTTP_PROXY>
+HTTPS_PROXY=<URL_OF_HTTPS_PROXY>
 ```
 ###### Note :- For product attribute labelling frontend PREFIX_WORD can be 'pal' and for backend server PREFIX can be 'pal-api' but it should match with your Api's and Paths.
 
