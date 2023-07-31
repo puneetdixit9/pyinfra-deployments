@@ -38,8 +38,8 @@ pip.venv(
 server.shell(
     name="Installing requirements.txt",
     commands=[
-        f"export http_proxy={HTTP_PROXY} && export https_proxy={HTTPS_PROXY} && cd {APPLICATION_PATH} && source "
-        f"venv/bin/activate && pip install -r requirements.txt"
+        f"export http_proxy={HTTP_PROXY} && export https_proxy={HTTPS_PROXY} && "
+        f"cd {APPLICATION_PATH} && {APPLICATION_PATH}/venv/bin/python -m pip install -r requirements.txt"
     ],
 )
 

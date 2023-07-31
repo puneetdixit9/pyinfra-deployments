@@ -18,10 +18,9 @@ commands = f"""
 su - -c'
     export http_proxy={HTTP_PROXY}
     export https_proxy={HTTPS_PROXY}
-    add-apt-repository universe -y
     apt update -y
     apt upgrade -y
-    apt-get install -y git curl nginx
+    apt install -y git curl nginx
 '
 """
 server.shell(name="Updating APT packages and ensuring git and curl", commands=[commands], _sudo=True)
