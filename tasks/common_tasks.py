@@ -20,7 +20,7 @@ su - -c'
     export https_proxy={HTTPS_PROXY}
     apt update -y
     apt upgrade -y
-    apt install -y git curl nginx
+    apt install -y git curl nginx unzip
 '
 """
 server.shell(name="Updating APT packages and ensuring git and curl", commands=[commands], _sudo=True)
