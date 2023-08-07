@@ -10,6 +10,13 @@ load_dotenv(dotenv_path)
 SERVER_PASSWORD = os.environ.get("SSH_PASSWORD")
 config.USE_SUDO_PASSWORD = SERVER_PASSWORD
 
+server.shell(
+    name="Remove current server.conf",
+    commands=["rm -rf /etc/nginx/sites-available/server.conf"],
+    _sudo=True,
+    _ignore_errors=True,
+)
+
 
 files.put(
     name="Uploading nginx config template file",

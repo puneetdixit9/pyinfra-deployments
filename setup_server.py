@@ -16,17 +16,31 @@ APP_NAME = os.environ.get("APP_NAME")
 SERVER_PASSWORD = os.environ.get("SSH_PASSWORD")
 HTTP_PROXY = os.environ.get("HTTP_PROXY")
 HTTPS_PROXY = os.environ.get("HTTPS_PROXY")
+USE_PROXY = int(os.environ.get("USE_PROXY", 0))
+INSTALL_PACKAGE_USING_SUDO_SU = int(os.environ.get("INSTALL_PACKAGE_USING_SUDO_SU", 0))
 config.USE_SUDO_PASSWORD = SERVER_PASSWORD
 
 local.include("./tasks/common_tasks.py")
 
-commands = f"""
-su - -c'
-    export http_proxy={HTTP_PROXY}
-    export https_proxy={HTTPS_PROXY}
-    apt-get install -y python3.10 python3.10-venv
-'
-"""
+if INSTALL_PACKAGE_USING_SUDO_SU:
+    commands = (
+        f"""
+    su - -c'
+        export http_proxy={HTTP_PROXY}
+        export https_proxy={HTTPS_PROXY}
+        apt-get install -y python3.10 python3.10-venv
+    '
+    """
+        if USE_PROXY
+        else """
+    su - -c'
+        apt-get install -y python3.10 python3.10-venv
+    '
+    """
+    )
+else:
+    commands = "apt-get install -y python3.10 python3.10-venv"
+
 server.shell(name="Ensuring Python3.10 and Virtual Environment", commands=[commands], _sudo=True)
 
 pip.venv(
@@ -35,12 +49,22 @@ pip.venv(
     python="python3",
 )
 
+if USE_PROXY:
+    commands = f"""
+        export http_proxy={HTTP_PROXY} &&
+        export https_proxy={HTTPS_PROXY} &&
+        cd {APPLICATION_PATH} &&
+        {APPLICATION_PATH}/venv/bin/python -m pip install -r requirements.txt
+    """
+else:
+    commands = f"""
+        cd {APPLICATION_PATH} &&
+        {APPLICATION_PATH}/venv/bin/python -m pip install -r requirements.txt
+    """
+
 server.shell(
     name="Installing requirements.txt",
-    commands=[
-        f"export http_proxy={HTTP_PROXY} && export https_proxy={HTTPS_PROXY} && "
-        f"cd {APPLICATION_PATH} && {APPLICATION_PATH}/venv/bin/python -m pip install -r requirements.txt"
-    ],
+    commands=[commands],
 )
 
 server.shell(
