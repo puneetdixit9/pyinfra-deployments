@@ -18,39 +18,66 @@ SERVER_PASSWORD = os.environ.get("SSH_PASSWORD")
 HTTP_PROXY = os.environ.get("HTTP_PROXY")
 HTTPS_PROXY = os.environ.get("HTTPS_PROXY")
 config.USE_SUDO_PASSWORD = SERVER_PASSWORD
+USE_PROXY = int(os.environ.get("USE_PROXY", 0))
+INSTALL_PACKAGE_USING_SUDO_SU = int(os.environ.get("INSTALL_PACKAGE_USING_SUDO_SU", 0))
 
 nvm_dir = f"/home/{SSH_USER}/.nvm"
 
 local.include("./tasks/common_tasks.py")
 
 
-commands = f"""
-su - -c'
-    export http_proxy={HTTP_PROXY}
-    export https_proxy={HTTPS_PROXY}
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
-    export NVM_DIR='{nvm_dir}'
-    [ -s $NVM_DIR/nvm.sh ]
-    . $NVM_DIR/nvm.sh
-    nvm install {NODE_VERSION}
-    nvm use {NODE_VERSION}
-    cd {APPLICATION_PATH}
-    npm install
-    npm run build
-'
-"""
+if INSTALL_PACKAGE_USING_SUDO_SU:
+    commands = (
+        f"""
+    su - -c'
+        export http_proxy={HTTP_PROXY}
+        export https_proxy={HTTPS_PROXY}
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+        export NVM_DIR='{nvm_dir}'
+        [ -s $NVM_DIR/nvm.sh ]
+        . $NVM_DIR/nvm.sh
+        nvm install {NODE_VERSION}
+        nvm use {NODE_VERSION}
+        cd {APPLICATION_PATH}
+        npm install
+        npm run build
+    '
+    """
+        if USE_PROXY
+        else f"""
+    su - -c'
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+        export NVM_DIR='{nvm_dir}'
+        [ -s $NVM_DIR/nvm.sh ]
+        . $NVM_DIR/nvm.sh
+        nvm install {NODE_VERSION}
+        nvm use {NODE_VERSION}
+        cd {APPLICATION_PATH}
+        npm install
+        npm run build
+    '
+    """
+    )
+else:
+    commands = f"""
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash &&
+        export NVM_DIR='{nvm_dir}' &&
+        [ -s $NVM_DIR/nvm.sh ] &&
+        . $NVM_DIR/nvm.sh &&
+        nvm install {NODE_VERSION} &&
+        nvm use {NODE_VERSION} &&
+        cd {APPLICATION_PATH} &&
+        npm install &&
+        npm run build
+    """
 
 # commands = f"""
-# su - -c'
-#     export http_proxy={HTTP_PROXY}
-#     export https_proxy={HTTPS_PROXY}
-#     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
-#     export NVM_DIR='{nvm_dir}'
-#     [ -s $NVM_DIR/nvm.sh ]
-#     . $NVM_DIR/nvm.sh
-#     nvm install {NODE_VERSION}
+#     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash &&
+#     export NVM_DIR='{nvm_dir}' &&
+#     [ -s $NVM_DIR/nvm.sh ] &&
+#     . $NVM_DIR/nvm.sh &&
+#     nvm install {NODE_VERSION} &&
 #     nvm use {NODE_VERSION}
-# '
 # """
 
 server.shell(name=f"Ensuring Node {NODE_VERSION}", commands=[commands], _sudo=True)
@@ -64,7 +91,7 @@ server.shell(
 
 
 # files.put(name="Putting build to server", src=f"{BUILD_PATH}", dest=f"{APPLICATION_PATH}")
-#
+
 # server.shell(
 #     name="Unzip build",
 #     commands=[f"rm -rf {APPLICATION_PATH}/build", f"unzip {APPLICATION_PATH}/build.zip -d {APPLICATION_PATH}"],
