@@ -2,7 +2,7 @@ import os
 
 from dotenv import load_dotenv
 from pyinfra import config
-from pyinfra.operations import git, server
+from pyinfra.operations import server
 
 dotenv_path = os.path.join(os.getcwd(), ".env")
 load_dotenv(dotenv_path)
@@ -12,8 +12,8 @@ REPO_BRANCH = os.environ.get("REPO_BRANCH")
 SERVER_PASSWORD = os.environ.get("SSH_PASSWORD")
 HTTP_PROXY = os.environ.get("HTTP_PROXY")
 HTTPS_PROXY = os.environ.get("HTTPS_PROXY")
-USE_PROXY = int(os.environ.get("USE_PROXY", 0))
-INSTALL_PACKAGE_USING_SUDO_SU = int(os.environ.get("INSTALL_PACKAGE_USING_SUDO_SU", 0))
+USE_PROXY = int(os.environ.get("FLAG_USE_PROXY", 0))
+INSTALL_PACKAGE_USING_SUDO_SU = int(os.environ.get("FLAG_INSTALL_PACKAGE_USING_SUDO_SU", 0))
 config.USE_SUDO_PASSWORD = SERVER_PASSWORD
 
 if INSTALL_PACKAGE_USING_SUDO_SU:
@@ -40,11 +40,3 @@ else:
     commands = "apt update -y && apt upgrade -y && apt install -y git curl nginx unzip"
 
 server.shell(name="Updating APT packages and ensuring git and curl", commands=[commands], _sudo=True)
-
-git.repo(
-    name="Clone or Pull repo",
-    src=os.environ.get("REPO_URL"),
-    dest=APPLICATION_PATH,
-    pull=True,
-    branch=REPO_BRANCH,
-)
